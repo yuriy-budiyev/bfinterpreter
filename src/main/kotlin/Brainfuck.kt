@@ -28,13 +28,13 @@ fun runBrainfuck(code: CharSequence) {
     evaluateIR(createIR(code))
 }
 
-private fun evaluateIR(input: List<Operation>) {
+private fun evaluateIR(operations: List<Operation>) {
     val memory = StringBuilder()
     memory.append('\u0000')
     var head = 0
     var operationPointer = 0
-    while (operationPointer < input.size) {
-        val operation = input[operationPointer]
+    while (operationPointer < operations.size) {
+        val operation = operations[operationPointer]
         when (operation.type) {
             Operator.MoveNext -> {
                 head += operation.value
@@ -190,4 +190,3 @@ private class Lexer(private val input: CharSequence) {
 
     private var index: Int = 0
 }
-
