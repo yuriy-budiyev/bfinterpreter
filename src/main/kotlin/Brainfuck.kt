@@ -28,6 +28,65 @@ fun runBrainfuck(code: CharSequence) {
     evaluateIR(createIR(code))
 }
 
+private fun createIR(input: CharSequence): List<Operation> {
+    val lexer = Lexer(input)
+    val operations = ArrayList<Operation>()
+    val addresses = ArrayDeque<Int>()
+    var operator: Operator? = lexer.next()
+    while (operator != null) {
+        when (operator) {
+            Operator.MoveNext,
+            Operator.MovePrevious,
+            Operator.Increment,
+            Operator.Decrement,
+            Operator.Write,
+            Operator.Read -> {
+                var value = 1
+                var nextOperator: Operator? = lexer.next()
+                while (nextOperator == operator) {
+                    value++
+                    nextOperator = lexer.next()
+                }
+                operations.add(
+                    Operation(
+                        operator,
+                        value,
+                    ),
+                )
+                operator = nextOperator
+            }
+            Operator.JumpZero -> {
+                addresses.addFirst(operations.size)
+                operations.add(
+                    Operation(
+                        Operator.JumpZero,
+                        0,
+                    ),
+                )
+                operator = lexer.next()
+            }
+            Operator.JumpNonZero -> {
+                if (addresses.isEmpty()) {
+                    throw IllegalStateException("Unbalanced loop")
+                }
+                val address = addresses.removeFirst()
+                operations.add(
+                    Operation(
+                        Operator.JumpNonZero,
+                        address + 1,
+                    ),
+                )
+                operations[address].value = operations.size
+                operator = lexer.next()
+            }
+        }
+    }
+    if (addresses.isNotEmpty()) {
+        throw IllegalStateException("Unbalanced loop")
+    }
+    return operations
+}
+
 private fun evaluateIR(operations: List<Operation>) {
     val memory = StringBuilder()
     memory.append('\u0000')
@@ -91,65 +150,6 @@ private fun evaluateIR(operations: List<Operation>) {
             }
         }
     }
-}
-
-private fun createIR(input: CharSequence): List<Operation> {
-    val lexer = Lexer(input)
-    val operations = ArrayList<Operation>()
-    val addresses = ArrayDeque<Int>()
-    var operator: Operator? = lexer.next()
-    while (operator != null) {
-        when (operator) {
-            Operator.MoveNext,
-            Operator.MovePrevious,
-            Operator.Increment,
-            Operator.Decrement,
-            Operator.Write,
-            Operator.Read -> {
-                var value = 1
-                var nextOperator: Operator? = lexer.next()
-                while (nextOperator == operator) {
-                    value++
-                    nextOperator = lexer.next()
-                }
-                operations.add(
-                    Operation(
-                        operator,
-                        value,
-                    ),
-                )
-                operator = nextOperator
-            }
-            Operator.JumpZero -> {
-                addresses.addFirst(operations.size)
-                operations.add(
-                    Operation(
-                        Operator.JumpZero,
-                        0,
-                    ),
-                )
-                operator = lexer.next()
-            }
-            Operator.JumpNonZero -> {
-                if (addresses.isEmpty()) {
-                    throw IllegalStateException("Unbalanced loop")
-                }
-                val address = addresses.removeFirst()
-                operations.add(
-                    Operation(
-                        Operator.JumpNonZero,
-                        address + 1,
-                    ),
-                )
-                operations[address].value = operations.size
-                operator = lexer.next()
-            }
-        }
-    }
-    if (addresses.isNotEmpty()) {
-        throw IllegalStateException("Unbalanced loop")
-    }
-    return operations
 }
 
 private enum class Operator(val symbol: Char) {
