@@ -25,7 +25,76 @@
 package com.github.yuriybudiyev.brainfuck
 
 fun runBrainfuck(code: CharSequence) {
-    val lexer = Lexer(code)
+    evaluateIR(createIR(code))
+}
+
+private fun evaluateIR(input: List<Operation>) {
+    val memory = StringBuilder()
+    memory.append('\u0000')
+    var head = 0
+    var operationPointer = 0
+    while (operationPointer < input.size) {
+        val operation = input[operationPointer]
+        when (operation.type) {
+            Operator.MoveNext -> {
+                head += operation.value
+                while (head >= memory.length) {
+                    memory.append('\u0000')
+                }
+                operationPointer++
+            }
+            Operator.MovePrevious -> {
+                if (head < operation.value) {
+                    throw IllegalStateException("Memory underflow")
+                }
+                head -= operation.value
+                operationPointer++
+            }
+            Operator.Increment -> {
+                memory[head] += operation.value
+                operationPointer++
+            }
+            Operator.Decrement -> {
+                memory[head] -= operation.value
+                operationPointer++
+            }
+            Operator.Write -> {
+                repeat(operation.value) {
+                    print(memory[head])
+                }
+                operationPointer++
+            }
+            Operator.Read -> {
+                repeat(operation.value) {
+                    val line = readln()
+                    if (line.isEmpty()) {
+                        memory[head] = '\u0000'
+                    } else {
+                        memory[head] = line[0]
+                    }
+                }
+                operationPointer++
+            }
+            Operator.JumpZero -> {
+                if (memory[head] == '\u0000') {
+                    operationPointer = operation.value
+                } else {
+                    operationPointer++
+                }
+            }
+            Operator.JumpNonZero -> {
+                if (memory[head] != '\u0000') {
+                    operationPointer = operation.value
+                } else {
+                    operationPointer++
+                }
+            }
+        }
+    }
+}
+
+private fun createIR(input: CharSequence): List<Operation> {
+    val lexer = Lexer(input)
     val operations = ArrayList<Operation>()
     val addresses = ArrayDeque<Int>()
     var operator: Operator? = lexer.next()
@@ -70,7 +139,7 @@ fun runBrainfuck(code: CharSequence) {
                     Operation(
                         Operator.JumpNonZero,
                         address + 1,
-                    )
+                    ),
                 )
                 operations[address].value = operations.size
                 operator = lexer.next()
@@ -80,7 +149,7 @@ fun runBrainfuck(code: CharSequence) {
     if (addresses.isNotEmpty()) {
         throw IllegalStateException("Unbalanced loop")
     }
-
+    return operations
 }
 
 private enum class Operator(val symbol: Char) {
