@@ -164,7 +164,7 @@ private enum class Operator(val symbol: Char) {
     JumpNonZero(']'),
 }
 
-private data class Operation(
+private class Operation(
     val type: Operator,
     var value: Int,
 )
