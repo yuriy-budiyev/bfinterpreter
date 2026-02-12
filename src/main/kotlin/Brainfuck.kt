@@ -76,7 +76,7 @@ private fun createIR(input: CharSequence): List<Operation> {
                         address + 1,
                     ),
                 )
-                operations[address].value = operations.size
+                operations[address].operand = operations.size
                 operator = lexer.next()
             }
         }
@@ -94,37 +94,37 @@ private fun evaluateIR(operations: List<Operation>) {
     var operationPointer = 0
     while (operationPointer < operations.size) {
         val operation = operations[operationPointer]
-        when (operation.type) {
+        when (operation.operator) {
             Operator.MoveNext -> {
-                head += operation.value
+                head += operation.operand
                 while (head >= memory.length) {
                     memory.append('\u0000')
                 }
                 operationPointer++
             }
             Operator.MovePrevious -> {
-                if (head < operation.value) {
+                if (head < operation.operand) {
                     throw IllegalStateException("Memory underflow")
                 }
-                head -= operation.value
+                head -= operation.operand
                 operationPointer++
             }
             Operator.Increment -> {
-                memory[head] += operation.value
+                memory[head] += operation.operand
                 operationPointer++
             }
             Operator.Decrement -> {
-                memory[head] -= operation.value
+                memory[head] -= operation.operand
                 operationPointer++
             }
             Operator.Write -> {
-                repeat(operation.value) {
+                repeat(operation.operand) {
                     print(memory[head])
                 }
                 operationPointer++
             }
             Operator.Read -> {
-                repeat(operation.value) {
+                repeat(operation.operand) {
                     val line = readln()
                     if (line.isEmpty()) {
                         memory[head] = '\u0000'
@@ -136,14 +136,14 @@ private fun evaluateIR(operations: List<Operation>) {
             }
             Operator.JumpZero -> {
                 if (memory[head] == '\u0000') {
-                    operationPointer = operation.value
+                    operationPointer = operation.operand
                 } else {
                     operationPointer++
                 }
             }
             Operator.JumpNonZero -> {
                 if (memory[head] != '\u0000') {
-                    operationPointer = operation.value
+                    operationPointer = operation.operand
                 } else {
                     operationPointer++
                 }
@@ -165,8 +165,8 @@ private enum class Operator(val symbol: Char) {
 }
 
 private class Operation(
-    val type: Operator,
-    var value: Int,
+    val operator: Operator,
+    var operand: Int,
 )
 
 private class Lexer(private val input: CharSequence) {
