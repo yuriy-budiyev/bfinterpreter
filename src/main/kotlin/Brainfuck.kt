@@ -41,16 +41,16 @@ private fun createIR(input: CharSequence): List<Operation> {
             Operator.Decrement,
             Operator.Write,
             Operator.Read -> {
-                var value = 1
+                var operand = 1
                 var nextOperator: Operator? = lexer.next()
                 while (nextOperator == operator) {
-                    value++
+                    operand++
                     nextOperator = lexer.next()
                 }
                 operations.add(
                     Operation(
                         operator,
-                        value,
+                        operand,
                     ),
                 )
                 operator = nextOperator
