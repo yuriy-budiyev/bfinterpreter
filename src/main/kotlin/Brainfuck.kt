@@ -152,16 +152,16 @@ private fun evaluateIR(operations: List<Operation>) {
     }
 }
 
-private enum class Operator(val symbol: Char) {
+private enum class Operator {
 
-    MoveNext('>'),
-    MovePrevious('<'),
-    Increment('+'),
-    Decrement('-'),
-    Write('.'),
-    Read(','),
-    JumpZero('['),
-    JumpNonZero(']'),
+    MoveNext,
+    MovePrevious,
+    Increment,
+    Decrement,
+    Write,
+    Read,
+    JumpZero,
+    JumpNonZero,
 }
 
 private class Operation(
@@ -174,14 +174,14 @@ private class Lexer(private val input: CharSequence) {
     fun next(): Operator? {
         while (index < input.length) {
             return when (input[index++]) {
-                Operator.MoveNext.symbol -> Operator.MoveNext
-                Operator.MovePrevious.symbol -> Operator.MovePrevious
-                Operator.Increment.symbol -> Operator.Increment
-                Operator.Decrement.symbol -> Operator.Decrement
-                Operator.Write.symbol -> Operator.Write
-                Operator.Read.symbol -> Operator.Read
-                Operator.JumpZero.symbol -> Operator.JumpZero
-                Operator.JumpNonZero.symbol -> Operator.JumpNonZero
+                '>' -> Operator.MoveNext
+                '<' -> Operator.MovePrevious
+                '+' -> Operator.Increment
+                '-' -> Operator.Decrement
+                '.' -> Operator.Write
+                ',' -> Operator.Read
+                '[' -> Operator.JumpZero
+                ']' -> Operator.JumpNonZero
                 else -> continue
             }
         }
