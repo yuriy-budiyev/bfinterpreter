@@ -34,5 +34,5 @@ const val BfHelloWorld2: String =
         "------.--------.>+.>."
 
 fun main() {
-    runBrainfuck(BfHelloWorld2)
+    runBrainfuck(BfHelloWorld1)
 }

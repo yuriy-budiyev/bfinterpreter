@@ -24,14 +24,14 @@
 
 package com.github.yuriybudiyev.brainfuck
 
-fun runBrainfuck(code: CharSequence) {
+fun runBrainfuck(code: String) {
     evaluateIR(createIR(code))
 }
 
-private fun createIR(input: CharSequence): List<Operation> {
+private fun createIR(input: String): List<Operation> {
     val lexer = Lexer(input)
     val operations = ArrayList<Operation>()
-    val addresses = ArrayDeque<Int>()
+    val addresses = IntStack()
     var operator: Operator? = lexer.next()
     while (operator != null) {
         when (operator) {
@@ -56,7 +56,7 @@ private fun createIR(input: CharSequence): List<Operation> {
                 operator = nextOperator
             }
             Operator.JumpZero -> {
-                addresses.addFirst(operations.size)
+                addresses.push(operations.size)
                 operations.add(
                     Operation(
                         Operator.JumpZero,
@@ -66,10 +66,10 @@ private fun createIR(input: CharSequence): List<Operation> {
                 operator = lexer.next()
             }
             Operator.JumpNonZero -> {
-                if (addresses.isEmpty()) {
+                if (addresses.size == 0) {
                     throw IllegalStateException("Unbalanced loop")
                 }
-                val address = addresses.removeFirst()
+                val address = addresses.pop()
                 operations.add(
                     Operation(
                         Operator.JumpNonZero,
@@ -81,7 +81,7 @@ private fun createIR(input: CharSequence): List<Operation> {
             }
         }
     }
-    if (addresses.isNotEmpty()) {
+    if (addresses.size != 0) {
         throw IllegalStateException("Unbalanced loop")
     }
     return operations
@@ -169,7 +169,7 @@ private class Operation(
     var operand: Int,
 )
 
-private class Lexer(private val input: CharSequence) {
+private class Lexer(private val input: String) {
 
     fun next(): Operator? {
         while (index < input.length) {
@@ -189,4 +189,34 @@ private class Lexer(private val input: CharSequence) {
     }
 
     private var index: Int = 0
+}
+
+private class IntStack {
+
+    var size: Int = 0
+        private set
+
+    fun pop(): Int =
+        data[--size]
+
+    fun push(value: Int) {
+        if (size < data.size) {
+            data[size] = value
+        } else {
+            val oldData = data
+            val newData = IntArray(size * 2)
+            System.arraycopy(
+                oldData,
+                0,
+                newData,
+                0,
+                oldData.size,
+            )
+            newData[size] = value
+            data = newData
+        }
+        size++
+    }
+
+    private var data: IntArray = IntArray(16)
 }
