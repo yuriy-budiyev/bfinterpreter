@@ -204,7 +204,7 @@ private class IntStack {
             data[size] = value
         } else {
             val oldData = data
-            val newData = IntArray(size * 2)
+            val newData = IntArray(oldData.size * 2)
             System.arraycopy(
                 oldData,
                 0,
