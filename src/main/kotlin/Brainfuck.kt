@@ -49,8 +49,8 @@ private fun createIR(input: String): List<Operation> {
                 }
                 operations.add(
                     Operation(
-                        operator,
-                        operand,
+                        operator = operator,
+                        operand = operand,
                     ),
                 )
                 operator = nextOperator
@@ -59,8 +59,8 @@ private fun createIR(input: String): List<Operation> {
                 addresses.push(operations.size)
                 operations.add(
                     Operation(
-                        Operator.JumpZero,
-                        0,
+                        operator = Operator.JumpZero,
+                        operand = 0,
                     ),
                 )
                 operator = lexer.next()
@@ -72,8 +72,8 @@ private fun createIR(input: String): List<Operation> {
                 val address = addresses.pop()
                 operations.add(
                     Operation(
-                        Operator.JumpNonZero,
-                        address + 1,
+                        operator = Operator.JumpNonZero,
+                        operand = address + 1,
                     ),
                 )
                 operations[address].operand = operations.size
