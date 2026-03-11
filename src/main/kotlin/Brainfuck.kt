@@ -30,8 +30,8 @@ fun runBrainfuck(code: String) {
 
 private fun createIR(input: String): List<Operation> {
     val lexer = Lexer(input)
-    val operations = ArrayList<Operation>(16)
-    val addresses = IntStack(16)
+    val operations = ArrayList<Operation>()
+    val addresses = IntStack()
     var operator: Operator? = lexer.next()
     while (operator != null) {
         when (operator) {
@@ -191,7 +191,7 @@ private class Lexer(private val input: String) {
     private var index: Int = 0
 }
 
-private class IntStack(capacity: Int) {
+private class IntStack(capacity: Int = 16) {
 
     var size: Int = 0
         private set
