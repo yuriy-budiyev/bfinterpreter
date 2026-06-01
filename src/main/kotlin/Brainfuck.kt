@@ -173,7 +173,7 @@ private class Lexer(private val input: String) {
 
     fun next(): Operator? {
         while (index < input.length) {
-            return when (val token = input[index++]) {
+            return when (input[index++]) {
                 '>' -> Operator.MoveNext
                 '<' -> Operator.MovePrevious
                 '+' -> Operator.Increment
@@ -182,7 +182,7 @@ private class Lexer(private val input: String) {
                 ',' -> Operator.Read
                 '[' -> Operator.JumpZero
                 ']' -> Operator.JumpNonZero
-                else -> throw IllegalArgumentException("Unexpected token $token")
+                else -> throw IllegalArgumentException("Unexpected token")
             }
         }
         return null
